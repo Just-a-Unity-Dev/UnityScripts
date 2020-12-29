@@ -1,40 +1,65 @@
 using UnityEngine;
-using System.Collections;
 
-public class PlayerMove : MonoBehaviour {
+public class Player : MonoBehaviour
+{
+    public float speed;
+    public float jumpForce;
+    private float moveInput;
 
-    public float moveSpeed;
-    public float jumpHeight;
+    private Rigidbody2D rb;
 
-    public LayerMask ground;
-    [HideInInspector] public bool grounded;
+    private bool facingRight = true;
+    private int extraJumps;
+    [HideInInspector] public int extraJumpsValue;
 
-    private Rigidbody rigidbody;
-    private BoxCollider bc;
 
-    private float distToGround;
+    private bool isGrouned;
+    public Transform groundCheck;
+    public float checkRadius;
+    public LayerMask whatIsGround;
 
-    // Use this for initialization
     void Start() {
-        rigidbody = gameObject.GetComponent<Rigidbody>();
-        bc = gameObject.GetComponent<BoxCollider>();
+        rb = GetComponent<Rigidbody2D>();
+        extraJumps = extraJumpsValue;
     }
 
-    private void OnCollisionStay(Collision collision) {
-        GameObject colGO = collision.gameObject;
-        if (colGO.layer == ground) {
-            grounded = true;
+
+
+    private void FixedUpdate() {
+
+        isGrouned = Physics2D.OverlapCircle(groundCheck.position, checkRadius, whatIsGround);
+
+
+        moveInput = Input.GetAxis("Horizontal");
+        rb.velocity = new Vector2(moveInput * speed, rb.velocity.y);
+
+        if (facingRight == false && moveInput > 0)
+            Flip();
+        else if (facingRight == true && moveInput < 0)
+            Flip();
+
+
+        void Flip() {
+            facingRight = !facingRight;
+            Vector3 Scaler = transform.localScale;
+            Scaler.x *= -1;
+            transform.localScale = Scaler;
         }
+
+
     }
 
-    // Update is called once per frame
     void Update() {
-        if (Input.GetKeyDown(KeyCode.Space) && grounded) {
-            rigidbody.velocity = new Vector2(0, jumpHeight);
-        } else if (Input.GetKey(KeyCode.A)) {
-            rigidbody.velocity = new Vector2(-moveSpeed, 0);
-        } else if (Input.GetKey(KeyCode.D)) {
-            rigidbody.velocity = new Vector2(moveSpeed, 0);
+        if (isGrouned == true) {
+            extraJumps = extraJumpsValue;
+        }
+
+        if (Input.GetKeyDown(KeyCode.UpArrow) && extraJumps > 0) {
+            rb.velocity = Vector2.up * jumpForce;
+            extraJumps--;
+        } else if (Input.GetKeyDown(KeyCode.Space) && extraJumps == 0 && isGrouned == true) {
+            rb.velocity = Vector2.up * jumpForce;
         }
     }
+
 }

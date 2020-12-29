@@ -16,9 +16,9 @@ public class PlayerMove : MonoBehaviour {
 
     // Use this for initialization
     void Start() {
+        grounded = false;
         rigidbody = gameObject.GetComponent<Rigidbody>();
         bc = gameObject.GetComponent<BoxCollider>();
-        distToGround = bc.bounds.extents.y;
     }
 
     private void OnCollisionStay(Collision collision) {
